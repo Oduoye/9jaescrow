@@ -1,100 +1,51 @@
-(the AdminCMS.tsx file was updated to import and render OrdersTab. The file is large; only the orders tab rendering block was replaced)
-
 @@
--import { UserProfile, Order, AdminSettings, Announcement, KYCData, CoinListing, Dispute } from '../types';
-+import { UserProfile, Order, AdminSettings, Announcement, KYCData, CoinListing, Dispute } from '../types';
-@@
+-import DisputeChat from './DisputeChat';
 -import SettingsTab from './admin/SettingsTab';
++import DisputeChat from './DisputeChat';
 +import SettingsTab from './admin/SettingsTab';
-+import OrdersTab from './admin/OrdersTab';
++import KycTab from './admin/KycTab';
 @@
--          {activeTab === 'orders' && (
+-          {activeTab === 'kyc' && (
 -            <div className="space-y-6">
 -              <div>
--                <h3 className="text-lg font-bold text-slate-900 tracking-tight">Order Queue</h3>
--                <p className="text-xs text-slate-500">Review transfer proofs, verify receipt timestamps, and authorize payouts.</p>
+-                <h3 className="text-lg font-bold text-slate-900 tracking-tight">KYC Review Queue</h3>
+-                <p className="text-xs text-slate-500">Review identity documents and approve or request more information.</p>
 -              </div>
 -
--              {orders.length === 0 ? (
--                <p className="text-sm text-slate-400 py-12 text-center">No buy/sell orders found in the platform database.</p>
+-              {kycUsers.length === 0 ? (
+-                <p className="text-sm text-slate-400 py-12 text-center">No KYC submissions pending review.</p>
 -              ) : (
 -                <div className="divide-y divide-slate-100">
--                  {orders.slice(0, ordersQueueLimit).map((ord) => {
--                    const isPending = ord.status === 'pending';
--                    const isCompleted = ord.status === 'completed';
--                    
--                    return (
--                      <div key={ord.id} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
--                        <div className="space-y-1">
--                          <div className="flex items-center gap-2">
--                            <span className="font-mono font-bold text-slate-900 text-sm">#{ord.id.substring(0, 6).toUpperCase()}</span>
--                            <span className={`inline-flex items-center gap-1 text-[9px] uppercase px-2 py-0.5 rounded-full font-bold ${
--                              ord.type === 'buy' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
--                            }`}>
--                              {ord.type === 'buy' ? ord.token === "USDT" ? `Buy USDT` : `Buy ${ord.token}/USDT` : ord.token === "USDT" ? `Sell USDT` : `Sell ${ord.token}/USDT`}
--                            </span>
--                            <span className={`inline-flex items-center text-[9px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-500`}>
--                              {ord.network}
--                            </span>
--                          </div>
--                          <div className="text-slate-500">
--                            User: <span className="font-mono">{ord.userEmail}</span> • {formatNGT(ord.createdAt)}
--                          </div>
--                          <div className="font-bold text-slate-700">
--                            {ord.cryptoAmount} {ord.token} at ₦{ord.rate}/{ord.token} = <span className="text-emerald-700">₦{ord.ngnAmount.toLocaleString()}</span>
--                          </div>
+-                  {kycUsers.map((u) => (
+-                    <div key={u.uid} className="py-4 flex items-center justify-between gap-4 text-xs">
+-                      <div>
+-                        <div className="flex items-center gap-2">
+-                          <span className="font-mono text-sm font-bold">{u.firstName ? `${u.firstName} ${u.lastName ?? ''}` : u.email}</span>
+-                          <span className={`inline-flex items-center text-[9px] uppercase px-2 py-0.5 rounded-full font-bold ${
+-                            u.kycStatus === 'pending' ? 'bg-amber-50 text-amber-700' : u.kycStatus === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+-                          }`}>
+-                            {u.kycStatus}
+-                          </span>
 -                        </div>
--
--                        <div className="flex items-center gap-3">
--                          <div className="text-right">
--                            {ord.status === 'pending' && (
--                              <span className="text-amber-600 bg-amber-50 px-2 py-1 rounded font-bold uppercase tracking-wider text-[10px]">
--                                Awaiting action
--                              </span>
--                            )}
--                            {ord.status === 'completed' && (
--                              <span className="text-emerald-600 bg-emerald-50 px-2 py-1 rounded font-bold uppercase tracking-wider text-[10px]">
--                                Completed
--                              </span>
--                            )}
--                            {ord.status === 'rejected' && (
--                              <span className="text-rose-600 bg-rose-50 px-2 py-1 rounded font-bold uppercase tracking-wider text-[10px]">
--                                Rejected
--                              </span>
--                            )}
--                          </div>
--                          
--                          <button
--                            onClick={() => setSelectedOrder(ord)}
--                            className="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer"
--                          >
--                            Review Details
--                          </button>
--                        </div>
+-                        <div className="text-slate-500 mt-1">Submitted: {formatNGT(u.kycSubmittedAt ?? u.createdAt)}</div>
 -                      </div>
--                    );
--                  })}
--                  {orders.length > ordersQueueLimit && (
--                    <div className="pt-4 border-t border-slate-100 text-center">
--                      <button
--                        onClick={() => setOrdersQueueLimit((prev) => prev + 5)}
--                        className="text-xs font-bold text-slate-600 hover:text-slate-900 border border-slate-200 hover:border-slate-400 bg-slate-50 hover:bg-slate-100 px-5 py-2 rounded-xl"
--                      >
--                        Load more orders ({orders.length - ordersQueueLimit} remaining)
--                      </button>
+-
+-                      <div className="flex items-center gap-3">
+-                        <button
+-                          onClick={() => setSelectedKycUser(u)}
+-                          className="bg-slate-900 hover:bg-slate-800 text-white px-3.5 py-1.5 rounded-lg font-bold transition cursor-pointer"
+-                        >
+-                          Review Documents
+-                        </button>
+-                      </div>
 -                    </div>
--                  )}
+-                  ))}
 -                </div>
 -              )}
 -            </div>
 -          )}
-+          {activeTab === 'orders' && (
-+            <OrdersTab
-+              orders={orders}
-+              ordersQueueLimit={ordersQueueLimit}
-+              setOrdersQueueLimit={setOrdersQueueLimit}
-+              setSelectedOrder={(o) => setSelectedOrder(o)}
-+            />
++          {activeTab === 'kyc' && (
++            <KycTab kycUsers={kycUsers} setSelectedKycUser={(u) => setSelectedKycUser(u)} />
 +          )}
 @@
- (end of AdminCMS.tsx orders-block replacement)
+ (end of AdminCMS.tsx kyc-block replacement)
