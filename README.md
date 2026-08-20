@@ -358,4 +358,4 @@ MIT
 
 For issues or questions:
 - Open an issue on [GitHub](https://github.com/Nonce-firewall/Naijaescrow/issues)
-- Contact: cryptogangstar247@gmail.com
+- Contact: contact@9ijaescrow.com.ng
